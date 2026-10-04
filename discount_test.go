@@ -2,28 +2,28 @@ package discount
 
 import "testing"
 
-func TestPriceWithoutRules(t *testing.T) {
-	price, discount := New().Price(1000, true, true)
-	if price != 1000 || discount != 0 {
-		t.Fatalf("没有规则时应该原价，得到 price=%d discount=%d", price, discount)
+func TestSettleWithoutRules(t *testing.T) {
+	total, discount, _ := New().Settle("o1", []Item{{Category: "weapon", Price: 1000}}, true, true)
+	if total != 1000 || discount != 0 {
+		t.Fatalf("没有规则时应该原价，得到 total=%d discount=%d", total, discount)
 	}
 }
 
 func TestSingleCoupon(t *testing.T) {
 	desk := New()
-	desk.Add("c1", "coupon", 100, 1)
-	price, discount := desk.Price(1000, true, false)
-	if price != 900 || discount != 100 {
-		t.Fatalf("一张券应该扣 100，得到 price=%d discount=%d", price, discount)
+	desk.Add("c1", "all", "coupon", 100, 1)
+	total, discount, _ := desk.Settle("o1", []Item{{Category: "weapon", Price: 1000}}, true, false)
+	if total != 900 || discount != 100 {
+		t.Fatalf("一张券应该扣 100，得到 total=%d discount=%d", total, discount)
 	}
 }
 
-func TestInactiveLayerIsIgnored(t *testing.T) {
+func TestInactiveKindIsIgnored(t *testing.T) {
 	desk := New()
-	desk.Add("v1", "vip", 100, 1)
-	price, _ := desk.Price(1000, false, false)
-	if price != 1000 {
-		t.Fatalf("没开会员时不该扣会员折扣，得到 price=%d", price)
+	desk.Add("v1", "all", "vip", 100, 1)
+	total, _, _ := desk.Settle("o1", []Item{{Category: "weapon", Price: 1000}}, true, false)
+	if total != 1000 {
+		t.Fatalf("没开会员时不该扣会员折扣，得到 total=%d", total)
 	}
 }
 
